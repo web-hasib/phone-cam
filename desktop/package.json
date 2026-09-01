@@ -10,9 +10,7 @@
     "dev": "electron .",
     "build": "electron-builder --win",
     "build:dir": "electron-builder --win --dir",
-    "build:portable": "electron-builder --win portable",
-    "build:linux": "electron-builder --linux --dir && node build-deb.js",
-    "build:deb": "node build-deb.js"
+    "build:portable": "electron-builder --win portable"
   },
   "build": {
     "appId": "com.phonecam.studio",
@@ -43,26 +41,6 @@
       "**/bin/**/*",
       "**/node_modules/koffi/**/*"
     ],
-    "linux": {
-      "target": [
-        {
-          "target": "deb",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "category": "Video",
-      "maintainer": "PhoneCam <support@phonecam.app>",
-      "synopsis": "PhoneCam Studio - Wireless Pro HD Webcam Receiver",
-      "description": "Turn your smartphone into a wireless pro HD webcam with ultra-low latency."
-    },
     "win": {
       "signAndEditExecutable": false,
       "target": [

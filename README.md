@@ -15,15 +15,14 @@
 
 ---
 
-## 📥 Desktop Software Downloads (PC Receiver)
+## 📥 Desktop Software Downloads (Windows 10/11)
 
 > 🚀 **Direct Download from GitHub Releases:** [**Download PhoneCam Studio v2.0.0**](https://github.com/web-hasib/phone-cam/releases/tag/v2.0.0)
 
-| Platform | Package Type | Direct Download Link | Description |
-| :--- | :--- | :--- | :--- |
-| **🪟 Windows 10/11** | **Installer Setup (.exe)** | [**Download Setup (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.Setup.2.0.0.exe) | Standard Windows Setup with Start Menu & Desktop Shortcut |
-| **🪟 Windows 10/11** | **Portable (.exe)** | [**Download Portable (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.2.0.0.exe) | Zero-install single executable (Run directly anywhere) |
-| **🐧 Linux (Debian/Ubuntu)** | **Debian Package (.deb)** | [**Download .deb (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/phonecam-studio_2.0.0_amd64.deb) | Ubuntu, Debian, Mint, Pop!_OS (`sudo dpkg -i ...`) |
+| Package Type | Direct Download Link | Description |
+| :--- | :--- | :--- |
+| **🪟 Windows Installer (.exe)** | [**Download Setup (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.Setup.2.0.0.exe) | Standard Windows Setup with Start Menu & Desktop Shortcut |
+| **🪟 Windows Portable (.exe)** | [**Download Portable (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.2.0.0.exe) | Zero-install single executable (Run directly anywhere) |
 
 ---
 
@@ -47,9 +46,6 @@
   * Horizontal Mirroring & Vertical Flip.
   * Smart Framing: **Fill (Cover)** vs **Natural (Contain)**.
   * Live Audio VU Meter & Instant HD Snapshots.
-* **🐧 Cross-Platform Desktop Receiver:**
-  * **Windows:** `.exe` Installer (Setup), `.exe` Portable (No install needed), and Unpacked binaries.
-  * **Linux:** Standards-compliant `.deb` package (Ubuntu, Debian, Linux Mint, Pop!_OS).
 
 ---
 
@@ -69,7 +65,6 @@ PhoneCam Studio/
 │   ├── renderer/       # Studio GUI (Dark liquid glass UI, Audio VU, Controls)
 │   ├── main.js         # Electron Main Process & IPC Bridge
 │   ├── vcam.js         # Koffi FFI Bridge to softcam.dll
-│   ├── build-deb.js    # Pure-JS Debian Package Builder
 │   └── package.json
 │
 ├── softcam/            # C++ Source Code for DirectShow Virtual Camera DLL
@@ -87,8 +82,7 @@ PhoneCam Studio/
 
 ### 1. Requirements
 * **Node.js**: v18.0.0 or higher
-* **Windows**: Windows 10/11 (64-bit) for DirectShow Virtual Camera
-* **Linux**: Ubuntu 20.04+, Debian 11+, or any derivative
+* **Windows**: Windows 10 or Windows 11 (64-bit)
 
 ---
 
@@ -124,9 +118,8 @@ npm start
 
 ---
 
-## 📦 Building Packages
+## 📦 Building Windows Executables
 
-### Windows (Installer & Portable)
 ```bash
 cd desktop
 
@@ -139,22 +132,6 @@ npm run build:dir
 Outputs in `desktop/dist/`:
 * `PhoneCam Studio Setup 2.0.0.exe` (Windows Installer)
 * `PhoneCam Studio 2.0.0.exe` (Portable executable)
-
-### Linux (.deb Package)
-```bash
-cd desktop
-
-# Generate Debian .deb package
-npm run build:deb
-```
-Outputs in `desktop/dist/`:
-* `phonecam-studio_2.0.0_amd64.deb`
-
-To install on Linux:
-```bash
-sudo dpkg -i phonecam-studio_2.0.0_amd64.deb
-sudo apt-get install -f
-```
 
 ---
 
