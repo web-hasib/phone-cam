@@ -4,6 +4,27 @@
 
 ---
 
+## 🌐 Live Web App & Direct Access
+
+* 📱 **Mobile Broadcaster & PWA Web App:**  
+  👉 **[https://cam-backend-4bdx.onrender.com](https://cam-backend-4bdx.onrender.com)**  
+  *(Open this link in your phone's browser or tap **"Add to Home Screen"** to install as a native full-screen app!)*
+
+* 📖 **Public User Guide & Setup Manual:**  
+  👉 **[https://cam-backend-4bdx.onrender.com/guide.html](https://cam-backend-4bdx.onrender.com/guide.html)**
+
+---
+
+## 📥 Desktop Software Downloads (PC Receiver)
+
+| Platform | Package Type | File Location | Description |
+| :--- | :--- | :--- | :--- |
+| **🪟 Windows 10/11** | **Installer (.exe)** | `desktop/dist/PhoneCam Studio Setup 2.0.0.exe` | Standard Windows Setup with Start Menu & Desktop Shortcut |
+| **🪟 Windows 10/11** | **Portable (.exe)** | `desktop/dist/PhoneCam Studio 2.0.0.exe` | Zero-install single executable (Run directly anywhere) |
+| **🐧 Linux (Debian/Ubuntu)** | **Debian Package (.deb)** | `desktop/dist/phonecam-studio_2.0.0_amd64.deb` | Ubuntu, Debian, Mint, Pop!_OS (`sudo dpkg -i ...`) |
+
+---
+
 ## 🌟 Key Features
 
 * **⚡ Ultra-Low Latency Video Pipeline:**
