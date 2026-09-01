@@ -17,11 +17,13 @@
 
 ## 📥 Desktop Software Downloads (PC Receiver)
 
-| Platform | Package Type | File Location | Description |
+> 🚀 **Direct Download from GitHub Releases:** [**Download PhoneCam Studio v2.0.0**](https://github.com/web-hasib/phone-cam/releases/tag/v2.0.0)
+
+| Platform | Package Type | Direct Download Link | Description |
 | :--- | :--- | :--- | :--- |
-| **🪟 Windows 10/11** | **Installer (.exe)** | `desktop/dist/PhoneCam Studio Setup 2.0.0.exe` | Standard Windows Setup with Start Menu & Desktop Shortcut |
-| **🪟 Windows 10/11** | **Portable (.exe)** | `desktop/dist/PhoneCam Studio 2.0.0.exe` | Zero-install single executable (Run directly anywhere) |
-| **🐧 Linux (Debian/Ubuntu)** | **Debian Package (.deb)** | `desktop/dist/phonecam-studio_2.0.0_amd64.deb` | Ubuntu, Debian, Mint, Pop!_OS (`sudo dpkg -i ...`) |
+| **🪟 Windows 10/11** | **Installer Setup (.exe)** | [**Download Setup (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.Setup.2.0.0.exe) | Standard Windows Setup with Start Menu & Desktop Shortcut |
+| **🪟 Windows 10/11** | **Portable (.exe)** | [**Download Portable (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.2.0.0.exe) | Zero-install single executable (Run directly anywhere) |
+| **🐧 Linux (Debian/Ubuntu)** | **Debian Package (.deb)** | [**Download .deb (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/phonecam-studio_2.0.0_amd64.deb) | Ubuntu, Debian, Mint, Pop!_OS (`sudo dpkg -i ...`) |
 
 ---
 
