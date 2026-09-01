@@ -4,6 +4,9 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# Mobile folder (Everything is handled via Web PWA)
+mobile/
+
 # Production Builds & Binaries (Too large for GitHub)
 dist/
 dist-*/

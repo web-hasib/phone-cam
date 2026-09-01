@@ -1,40 +1,171 @@
-# PhoneCam: Wireless Phone-to-PC Webcam Studio
+# 🎥 PhoneCam Studio v2.0
 
-A 3-tier wireless webcam system connecting a mobile camera directly to an Electron desktop software using a dedicated NestJS WebSocket signaling server.
-
----
-
-## 🏗️ Architecture
-
-- **`backend/`**: NestJS + Socket.IO WebRTC Signaling Gateway (Self-hosted on Port 4000).
-- **`desktop/`**: Electron Desktop Software (Native WebRTC Receiver, QR Code Generator, Always-on-top, Snapshot Export, PiP).
-- **`mobile/`**: React Native (Expo) Mobile App (Live Camera View, Back/Front Flip, Torch, OLED Battery Saver, QR Scanner).
+> **Turn your smartphone into a wireless pro HD webcam for PC with ultra-low latency (<30ms), DirectShow Virtual Camera support (Google Meet, Zoom, MS Teams), OLED battery saving, and zero-configuration pairing.**
 
 ---
 
-## 🚀 How to Run
+## 🌟 Key Features
 
-### 1. Start the NestJS Backend Server
+* **⚡ Ultra-Low Latency Video Pipeline:**
+  * **WebRTC P2P:** Direct browser-to-desktop hardware-accelerated video streaming with <30ms latency.
+  * **TurboFrame WebSocket Fallback:** Resilient fallback for strict enterprise firewalls and mobile data networks.
+* **🎥 Native DirectShow Virtual Camera:**
+  * Appears as a real system camera (`PhoneCam Virtual Camera`) in **Google Meet, Zoom, MS Teams, OBS Studio, Discord**, and Windows Camera app.
+  * 16:9 Widescreen aspect ratio (Zero stretching / distortion) in **480p (848x480)**, **720p (1280x720)**, and **1080p (1920x1080)**.
+* **📱 Web & PWA Broadcaster (Zero App Install):**
+  * Runs directly in any mobile browser (Chrome, Safari, Firefox).
+  * Supports **PWA (Add to Home Screen)** for a full-screen native app experience.
+  * **Integrated QR Code Scanner** for instant 1-second pairing.
+  * **🔄 Live 0°/90°/180°/270° Rotation:** Rotate camera feed from phone or PC in real-time.
+  * **🌙 OLED Battery Saver (Dimmer Mode):** 100% true pitch black `#000000` screen saver with Screen Wake Lock—keeps camera active continuously with 0mW screen power drain.
+* **🎨 Pro Studio Controls:**
+  * Live Color Grading (Brightness, Contrast, Saturation, Warmth).
+  * Studio presets: Studio Warm, Cool Crisp, Cinema B&W, Vivid Punch, Portrait Glow.
+  * Horizontal Mirroring & Vertical Flip.
+  * Smart Framing: **Fill (Cover)** vs **Natural (Contain)**.
+  * Live Audio VU Meter & Instant HD Snapshots.
+* **🐧 Cross-Platform Desktop Receiver:**
+  * **Windows:** `.exe` Installer (Setup), `.exe` Portable (No install needed), and Unpacked binaries.
+  * **Linux:** Standards-compliant `.deb` package (Ubuntu, Debian, Linux Mint, Pop!_OS).
+
+---
+
+## 🏗️ Project Architecture
+
+```
+PhoneCam Studio/
+├── backend/            # NestJS WebRTC Signaling Server + Web PWA Broadcaster
+│   ├── public/         # Mobile PWA Broadcaster (QR Scanner, Camera UI, Service Worker)
+│   ├── src/
+│   │   ├── signaling/  # Low-latency Socket.IO Signaling Gateway
+│   │   └── main.ts     # Express + NestJS Server Entry
+│   └── package.json
+│
+├── desktop/            # Electron Desktop Studio Receiver + DirectShow VCam
+│   ├── bin/            # softcam.dll (64-bit DirectShow Native Filter)
+│   ├── renderer/       # Studio GUI (Dark liquid glass UI, Audio VU, Controls)
+│   ├── main.js         # Electron Main Process & IPC Bridge
+│   ├── vcam.js         # Koffi FFI Bridge to softcam.dll
+│   ├── build-deb.js    # Pure-JS Debian Package Builder
+│   └── package.json
+│
+├── softcam/            # C++ Source Code for DirectShow Virtual Camera DLL
+│   ├── src/            # Filter & Ring Buffer implementation
+│   └── softcam.sln     # Visual Studio C++ Solution
+│
+├── .env.example        # Master Environment Variables Template
+├── .gitignore          # Git exclusion rules
+└── README.md           # Documentation
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Requirements
+* **Node.js**: v18.0.0 or higher
+* **Windows**: Windows 10/11 (64-bit) for DirectShow Virtual Camera
+* **Linux**: Ubuntu 20.04+, Debian 11+, or any derivative
+
+---
+
+### 2. Backend & Web Broadcaster Setup
+
 ```bash
+# Navigate to backend directory
 cd backend
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm start
 ```
-> The server will start on `http://localhost:4000` with WebSocket signaling enabled.
+* The backend server will start on `http://localhost:4000`.
+* Open `http://localhost:4000` on your mobile phone browser to open the Broadcaster / QR Scanner.
 
 ---
 
-### 2. Launch the Electron Desktop App
+### 3. Desktop Studio Setup & Run
+
+```bash
+# Navigate to desktop directory
+cd desktop
+
+# Install dependencies
+npm install
+
+# Launch Desktop Studio in Development Mode
+npm start
+```
+
+---
+
+## 📦 Building Packages
+
+### Windows (Installer & Portable)
 ```bash
 cd desktop
-npm start
+
+# Build Windows Setup Installer & Portable .exe
+npm run build
+
+# Or build unpacked directory:
+npm run build:dir
 ```
-> The desktop software will open with a live QR Code and Session ID.
+Outputs in `desktop/dist/`:
+* `PhoneCam Studio Setup 2.0.0.exe` (Windows Installer)
+* `PhoneCam Studio 2.0.0.exe` (Portable executable)
+
+### Linux (.deb Package)
+```bash
+cd desktop
+
+# Generate Debian .deb package
+npm run build:deb
+```
+Outputs in `desktop/dist/`:
+* `phonecam-studio_2.0.0_amd64.deb`
+
+To install on Linux:
+```bash
+sudo dpkg -i phonecam-studio_2.0.0_amd64.deb
+sudo apt-get install -f
+```
 
 ---
 
-### 3. Run the React Native Mobile App
-```bash
-cd mobile
-npm start
+## ⚙️ Environment Configuration (`.env`)
+
+Create a `.env` file in the root or `desktop/` directory:
+
+```env
+# URL of your deployed signaling backend server
+BACKEND_URL=https://your-backend-domain.com
+
+# Server Port (default: 4000)
+PORT=4000
+
+# Optional Local Wi-Fi IP for direct zero-latency LAN streaming
+LOCAL_IP=http://192.168.1.100:4000
 ```
-> Open Expo Go on your Android/iOS phone, scan the QR code displayed in the desktop app, and enjoy high-speed live camera streaming!
+
+---
+
+## 📖 How to Use
+
+1. **Launch Desktop App:**
+   Open **PhoneCam Studio** on your PC. It will display a QR Code and 4-letter session code (e.g. `CAM1`).
+2. **Open Mobile PWA:**
+   Open your browser and navigate to your backend URL (or scan the QR code using your phone camera).
+3. **Instant Stream:**
+   The phone camera will automatically stream HD video to your PC.
+4. **Use in Google Meet / Zoom:**
+   * Open **Google Meet** or **Zoom** Settings ➔ **Video** ➔ Select **`PhoneCam Virtual Camera`**.
+   * Toggle the `VCam` button in PhoneCam Studio.
+
+---
+
+## 🛡️ License
+
+MIT License © 2026 PhoneCam Studio. Built with NestJS, Electron, WebRTC, and DirectShow.
