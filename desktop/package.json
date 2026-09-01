@@ -1,0 +1,101 @@
+{
+  "name": "phonecam-desktop",
+  "version": "2.0.0",
+  "description": "PhoneCam Desktop Receiver Software",
+  "homepage": "https://cam-backend-4bdx.onrender.com",
+  "main": "main.js",
+  "author": "PhoneCam",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder --win",
+    "build:dir": "electron-builder --win --dir",
+    "build:portable": "electron-builder --win portable",
+    "build:linux": "electron-builder --linux --dir && node build-deb.js",
+    "build:deb": "node build-deb.js"
+  },
+  "build": {
+    "appId": "com.phonecam.studio",
+    "productName": "PhoneCam Studio",
+    "copyright": "Copyright © 2026 PhoneCam",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "vcam.js",
+      "renderer/**/*",
+      "bin/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/bin/**/*",
+      "**/node_modules/koffi/**/*"
+    ],
+    "linux": {
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Video",
+      "maintainer": "PhoneCam <support@phonecam.app>",
+      "synopsis": "PhoneCam Studio - Wireless Pro HD Webcam Receiver",
+      "description": "Turn your smartphone into a wireless pro HD webcam with ultra-low latency."
+    },
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PhoneCam Studio"
+    }
+  },
+  "dependencies": {
+    "koffi": "^3.1.6",
+    "qrcode": "^1.5.4",
+    "socket.io-client": "^4.8.1",
+    "sudo-prompt": "^9.2.1"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  }
+}

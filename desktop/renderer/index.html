@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhoneCam Desktop Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../node_modules/socket.io-client/dist/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+            <circle cx="12" cy="13" r="3"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PhoneCam</span>
+          <span class="brand-subtitle">Desktop Studio</span>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <div class="status-badge" id="statusBadge">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">Connecting...</span>
+        </div>
+
+        <!-- Multi-Camera Quick Switcher -->
+        <div class="camera-switcher-pill" id="cameraSwitcherPill" style="display: none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+            <circle cx="12" cy="13" r="3"/>
+          </svg>
+          <select id="cameraSelect" class="camera-select" title="Switch active camera">
+            <option value="">No cameras connected</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btnPin" class="icon-btn" title="Toggle Always on Top">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"></line>
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+          </svg>
+        </button>
+
+        <!-- Sidebar Collapse / Expand Toggle Button -->
+        <button id="btnToggleSidebar" class="icon-btn" title="Collapse / Expand Sidebar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="15" y1="3" x2="15" y2="21"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-content" id="mainContent">
+      <!-- Left: Video Viewport & Controls -->
+      <section class="viewport-section" id="viewportSection">
+        <div class="video-container" id="videoContainer">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <img id="framePreview" alt="Live Feed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 5;" />
+
+          <!-- Flash Effect Layer for Snapshot -->
+          <div class="shutter-flash" id="shutterFlash"></div>
+
+          <!-- Waiting Overlay -->
+          <div class="viewport-overlay" id="viewportOverlay">
+            <div class="overlay-card">
+              <div class="overlay-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+                  <path d="M12 18h.01"/>
+                </svg>
+              </div>
+              <h3 id="overlayTitle">Waiting for phone connection</h3>
+              <p id="overlayDesc">Scan the QR code or enter session code in your phone app.</p>
+            </div>
+          </div>
+
+          <!-- Live HUD Overlay -->
+          <div class="live-hud" id="liveHud" style="display: none;">
+            <div class="hud-pill live-tag">
+              <span class="hud-dot"></span>
+              <span id="hudActiveDevice">Live Camera</span>
+            </div>
+            <div class="hud-pill" id="hudResolution">-- x --</div>
+            <div class="hud-pill" id="hudFpsBadge">30 fps</div>
+            <div class="hud-pill hud-mic-pill" id="hudMicLevel">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              </svg>
+              <div class="vu-meter"><div class="vu-bar" id="vuBar"></div></div>
+            </div>
+          </div>
+
+          <!-- Toast Notification Banner -->
+          <div class="toast-banner" id="toastBanner"></div>
+        </div>
+
+        <!-- Video Control Bar -->
+        <div class="control-bar">
+          <div class="control-group">
+            <!-- Audio / Mute Button -->
+            <button id="btnMute" class="btn-tool" title="Mute / Unmute Audio">
+              <svg id="iconUnmuted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+              <svg id="iconMuted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+              </svg>
+              <span id="audioLabel">Audio</span>
+            </button>
+
+            <!-- Volume Slider -->
+            <div class="volume-slider-box" id="volumeBox">
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" class="mini-slider" title="Volume">
+            </div>
+
+            <!-- Virtual Camera Bottom Tool Button (Google Meet / Zoom Virtual Camera) -->
+            <button id="btnVcamBottom" class="btn-tool active" title="Toggle Virtual Camera (DirectShow Softcam for Google Meet/Zoom)">
+              <svg id="vcamIconOn" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 7l-7 5 7 5V7z"></path>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+              <svg id="vcamIconOff" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path>
+                <path d="M23 7l-7 5 7 5V7z"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+              <span id="vcamBottomLabel">VCam: 480p</span>
+              <span class="vcam-dot on" id="vcamBottomDot"></span>
+            </button>
+
+            <!-- Instant Snapshot -->
+            <button id="btnSnapshot" class="btn-tool btn-snapshot-highlight" title="Save Camera Snapshot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="m21 15-5-5L5 21"/>
+              </svg>
+              <span>Snapshot</span>
+            </button>
+
+            <!-- Picture-in-Picture -->
+            <button id="btnPip" class="btn-tool" title="Picture in Picture">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="14" x="3" y="5" rx="2"/>
+                <rect width="6" height="4" x="13" y="13" rx="1"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="control-group">
+            <!-- Fullscreen -->
+            <button id="btnFullscreen" class="btn-tool" title="Fullscreen">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+                <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+                <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
+                <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Draggable Sidebar Resizer Divider -->
+      <div class="sidebar-resizer" id="sidebarResizer" title="Drag to resize sidebar • Double click to toggle">
+        <div class="resizer-handle"></div>
+      </div>
+
+      <!-- Right: Sidebar Studio Tabs -->
+      <aside class="sidebar-section" id="sidebarSection">
+        <!-- Sidebar Navigation Tabs -->
+        <div class="sidebar-tabs">
+          <button class="tab-btn active" id="tabBtnStudio" data-tab="tabStudio">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            <span>Studio Tuning</span>
+          </button>
+          <button class="tab-btn" id="tabBtnVcam" data-tab="tabVcam">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"></polygon>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+            <span>Virtual Camera</span>
+          </button>
+          <button class="tab-btn" id="tabBtnConnect" data-tab="tabConnect">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span>Connect</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: STUDIO TUNING (PREFRAMING, MIRROR, ROTATION, COLOR FILTERS) -->
+        <div class="tab-content active" id="tabStudio">
+          <!-- Orientation & Framing Card -->
+          <div class="panel-card">
+            <div class="card-header">
+              <h4 class="card-title">Orientation & Framing</h4>
+            </div>
+
+            <!-- Mirror / Flip Buttons -->
+            <div class="studio-btn-row">
+              <button class="btn-studio-action" id="btnMirrorH" title="Mirror horizontally (selfie view)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/>
+                  <path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/>
+                  <line x1="12" y1="2" x2="12" y2="22"/>
+                </svg>
+                <span>Mirror (Flip H)</span>
+              </button>
+              <button class="btn-studio-action" id="btnFlipV" title="Flip vertically">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 8V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3"/>
+                  <path d="M3 16v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                </svg>
+                <span>Flip V</span>
+              </button>
+            </div>
+
+            <!-- Rotation & Framing Mode -->
+            <div class="studio-control-row">
+              <label class="studio-label">Rotate</label>
+              <div class="rotation-btn-group">
+                <button class="btn-rotate active" data-rot="0">0°</button>
+                <button class="btn-rotate" data-rot="90">90°</button>
+                <button class="btn-rotate" data-rot="180">180°</button>
+                <button class="btn-rotate" data-rot="270">270°</button>
+              </div>
+            </div>
+
+            <!-- Zoom / Crop Slider -->
+            <div class="studio-control-row">
+              <div class="slider-label-row">
+                <span class="studio-label">Zoom / Crop</span>
+                <span class="slider-val" id="zoomVal">1.0x</span>
+              </div>
+              <input type="range" id="sliderZoom" min="1.0" max="3.0" step="0.1" value="1.0" class="studio-slider">
+            </div>
+
+            <!-- Framing Fit/Fill -->
+            <div class="studio-control-row">
+              <label class="studio-label">Framing</label>
+              <select class="studio-select" id="vcamFitSelect">
+                <option value="contain" selected>Fit (Natural, No Stretch)</option>
+                <option value="cover">Fill (Zoom to 16:9)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Color Grading & Filters Card -->
+          <div class="panel-card">
+            <div class="card-header">
+              <h4 class="card-title">Color Filters & Beauty</h4>
+              <button class="btn-text-link" id="btnResetFilters">Reset</button>
+            </div>
+
+            <!-- One-Click Quick Filter Presets -->
+            <div class="preset-chips-row">
+              <button class="chip-btn active" data-preset="normal">Normal</button>
+              <button class="chip-btn" data-preset="studio">Studio Pro</button>
+              <button class="chip-btn" data-preset="beauty">Beauty Glow</button>
+              <button class="chip-btn" data-preset="cinematic">Cinematic</button>
+              <button class="chip-btn" data-preset="bw">B & W</button>
+              <button class="chip-btn" data-preset="cool">Cool Tone</button>
+            </div>
+
+            <!-- Manual Fine-tuning Sliders -->
+            <div class="studio-sliders-grid">
+              <div class="studio-slider-box">
+                <div class="slider-label-row">
+                  <span class="studio-label">Brightness</span>
+                  <span class="slider-val" id="valBrightness">100%</span>
+                </div>
+                <input type="range" id="sliderBrightness" min="50" max="170" value="100" class="studio-slider">
+              </div>
+
+              <div class="studio-slider-box">
+                <div class="slider-label-row">
+                  <span class="studio-label">Contrast</span>
+                  <span class="slider-val" id="valContrast">100%</span>
+                </div>
+                <input type="range" id="sliderContrast" min="60" max="160" value="100" class="studio-slider">
+              </div>
+
+              <div class="studio-slider-box">
+                <div class="slider-label-row">
+                  <span class="studio-label">Saturation</span>
+                  <span class="slider-val" id="valSaturation">100%</span>
+                </div>
+                <input type="range" id="sliderSaturation" min="0" max="200" value="100" class="studio-slider">
+              </div>
+
+              <div class="studio-slider-box">
+                <div class="slider-label-row">
+                  <span class="studio-label">Warmth</span>
+                  <span class="slider-val" id="valWarmth">0%</span>
+                </div>
+                <input type="range" id="sliderWarmth" min="0" max="100" value="0" class="studio-slider">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: VIRTUAL CAMERA SETTINGS -->
+        <div class="tab-content" id="tabVcam">
+          <div class="panel-card vcam-card">
+            <div class="card-header">
+              <h4 class="card-title">Virtual Camera Output</h4>
+            </div>
+
+            <div class="vcam-status-row">
+              <div class="vcam-status-badge">
+                <span class="vcam-dot" id="vcamStatusDot"></span>
+                <span id="vcamStatusText">Inactive</span>
+              </div>
+              <button class="btn-vcam-toggle" id="btnVcamToggle">Start</button>
+            </div>
+
+            <div class="vcam-controls">
+              <div class="vcam-control-row">
+                <label class="vcam-label">Resolution</label>
+                <select class="vcam-select" id="vcamResSelect">
+                  <option value="480p" selected>480p (848 x 480 Widescreen 16:9)</option>
+                  <option value="720p">720p (1280 x 720 HD 16:9)</option>
+                  <option value="1080p">1080p (1920 x 1080 Full HD 16:9)</option>
+                </select>
+              </div>
+
+              <div class="vcam-control-row">
+                <span class="vcam-driver-label" id="vcamDriverStatus">Driver: Checking...</span>
+                <button class="btn-vcam-install" id="btnVcamInstallDriver" style="display: none;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Install Driver
+                </button>
+              </div>
+
+              <div class="vcam-info">
+                Appears as <strong>"DirectShow Softcam"</strong> in Zoom, Meet, Windows Camera & Discord.
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection Diagnostics -->
+          <div class="panel-card">
+            <h4 class="card-title mb-2">Stream Diagnostics</h4>
+            <div class="spec-row">
+              <span>WebRTC Protocol</span>
+              <span class="spec-val">Direct P2P Hardware</span>
+            </div>
+            <div class="spec-row">
+              <span>Signaling</span>
+              <span class="spec-val">NestJS Cloud Gateway</span>
+            </div>
+            <div class="spec-row">
+              <span>Active Stream</span>
+              <span class="spec-val" id="diagActiveCamera">None</span>
+            </div>
+            <div class="spec-row">
+              <span>Framerate</span>
+              <span class="spec-val" id="hudFps">-- fps</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: CONNECT & PAIRING -->
+        <div class="tab-content" id="tabConnect">
+          <div class="panel-card">
+            <div class="card-header">
+              <h4 class="card-title">Pair Phone</h4>
+              <button class="btn-text-link" id="btnReconnect">New Code</button>
+            </div>
+
+            <div class="qr-box">
+              <img id="qrImg" class="qr-img" alt="QR Code" style="width: 140px; height: 140px; display: block;" />
+            </div>
+
+            <div class="session-box">
+              <div class="session-label">Session ID (Room Code)</div>
+              <div class="session-code" id="sessionCode">----</div>
+            </div>
+
+            <div class="server-endpoint">
+              <span class="server-label">Endpoint</span>
+              <span class="server-val" id="serverIp">https://cam-backend-4bdx.onrender.com</span>
+            </div>
+          </div>
+
+          <!-- USB High-Speed Connection Card -->
+          <div class="panel-card usb-card">
+            <div class="card-header">
+              <h4 class="card-title">⚡ USB Mode (0ms Latency)</h4>
+              <span class="vcam-driver-label" id="usbStatusBadge">Ready</span>
+            </div>
+            <p class="vcam-info" style="border: none; padding: 0; margin-bottom: 10px;">
+              Connect via USB cable for <strong>instant 0ms response</strong> & continuous phone charging.
+            </p>
+            <button class="btn-studio-action" id="btnStartUsbTunnel" style="margin-bottom: 8px; width: 100%;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Enable USB High-Speed Tunnel</span>
+            </button>
+            <div class="vcam-info">
+              <strong>Android:</strong> Turn on USB Debugging or USB Tethering.<br>
+              <strong>iPhone:</strong> Connect USB & enable Personal Hotspot over USB.
+            </div>
+          </div>
+
+          <!-- Connected Devices Card -->
+          <div class="panel-card" id="deviceListCard">
+            <h4 class="card-title mb-2">Connected Phones (<span id="deviceCount">0</span>)</h4>
+            <div id="deviceListContainer" class="device-list-container">
+              <div class="no-devices-msg">No phones connected yet</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

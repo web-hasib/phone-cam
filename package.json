@@ -1,0 +1,10 @@
+{
+  "name": "phonecam-workspace",
+  "version": "2.0.0",
+  "description": "PhoneCam: NestJS Backend + Electron Desktop Studio + React Native Mobile App",
+  "scripts": {
+    "backend": "npm --prefix backend run start:dev",
+    "desktop": "npm --prefix desktop start",
+    "mobile": "npm --prefix mobile start"
+  }
+}
