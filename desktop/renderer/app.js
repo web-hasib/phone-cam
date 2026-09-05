@@ -50,6 +50,7 @@ let frameCount = 0;
 // Audio Visualizer State
 let audioCtx = null;
 let analyserNode = null;
+let audioSourceNode = null;
 let audioAnimId = null;
 
 // Virtual Camera State
@@ -305,10 +306,17 @@ function setupAudioVisualizer(stream) {
       audioCtx.resume();
     }
 
-    const source = audioCtx.createMediaStreamSource(stream);
-    analyserNode = audioCtx.createAnalyser();
-    analyserNode.fftSize = 64;
-    source.connect(analyserNode);
+    if (audioSourceNode) {
+      try { audioSourceNode.disconnect(); } catch (e) {}
+      audioSourceNode = null;
+    }
+
+    audioSourceNode = audioCtx.createMediaStreamSource(stream);
+    if (!analyserNode) {
+      analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 64;
+    }
+    audioSourceNode.connect(analyserNode);
 
     const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
 
@@ -337,7 +345,13 @@ function setupAudioVisualizer(stream) {
 }
 
 // ─── WebRTC Engine ─────────────────────────────────────────────────
-function initWebRTC() {
+function initWebRTC(targetSocketId = null) {
+  if (targetSocketId) {
+    activeMobileSocketId = targetSocketId;
+  }
+
+  iceCandidateQueue = [];
+
   if (peerConnection && peerConnection.signalingState !== "closed") {
     try { peerConnection.close(); } catch (e) {}
   }
@@ -355,7 +369,8 @@ function initWebRTC() {
       }
       remoteVideo.srcObject.addTrack(event.track);
       stream = remoteVideo.srcObject;
-    } else {
+    } else if (remoteVideo.srcObject !== stream) {
+      // Guard against resetting video pipeline on subsequent tracks (e.g. audio track arriving after video)
       remoteVideo.srcObject = stream;
     }
 
@@ -373,7 +388,17 @@ function initWebRTC() {
           }
           setupAudioVisualizer(stream);
         })
-        .catch((err) => console.warn("Autoplay notice:", err));
+        .catch((err) => {
+          console.warn("Autoplay notice, retrying with muted:", err);
+          // If browser Autoplay policy blocks unmuted video, mute & resume immediately
+          remoteVideo.muted = true;
+          remoteVideo.play().then(() => {
+            if (remoteVideo.videoWidth) {
+              hudResolution.textContent = `${remoteVideo.videoWidth} x ${remoteVideo.videoHeight}`;
+            }
+            setupAudioVisualizer(stream);
+          }).catch((err2) => console.warn("Muted autoplay also failed:", err2));
+        });
     }
 
     viewportOverlay.style.display = "none";
@@ -387,11 +412,12 @@ function initWebRTC() {
 
   peerConnection.onicecandidate = (event) => {
     if (event.candidate && socket && socket.connected) {
+      const destId = targetSocketId || activeMobileSocketId;
       socket.emit("ice-candidate", {
         roomId: sessionId,
         candidate: event.candidate,
         from: "desktop",
-        targetSocketId: activeMobileSocketId,
+        targetSocketId: destId,
       });
     }
   };
@@ -402,6 +428,13 @@ function initWebRTC() {
       setStatus("Live Streaming (WebRTC P2P)", "connected");
       viewportOverlay.style.display = "none";
       liveHud.style.display = "flex";
+    } else if (state === "disconnected" || state === "failed") {
+      console.warn("WebRTC connection state:", state);
+      // If WebRTC drops, reveal TurboFrame if it is transmitting
+      if (framePreview && framePreview.naturalWidth > 0) {
+        framePreview.style.display = "block";
+        remoteVideo.style.display = "none";
+      }
     }
   };
 }
@@ -474,11 +507,12 @@ function connectSocket() {
   socket.on("webrtc-offer", async (data) => {
     if (data.from !== "mobile") return;
     const fromSocketId = data.fromSocketId;
+    activeMobileSocketId = fromSocketId;
 
     try {
-      if (!peerConnection || peerConnection.signalingState === "closed") {
-        initWebRTC();
-      }
+      // Always initialize a fresh peer connection for incoming offer from mobile
+      initWebRTC(fromSocketId);
+
       await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
 
       while (iceCandidateQueue.length > 0) {

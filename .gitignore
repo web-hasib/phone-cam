@@ -4,8 +4,11 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# Mobile folder (Everything is handled via Web PWA)
-mobile/
+# Mobile folder (Ignore dependencies and build outputs)
+mobile/node_modules/
+mobile/.expo/
+mobile/android/
+mobile/ios/
 
 # Production Builds & Binaries (Too large for GitHub)
 dist/

@@ -34,6 +34,12 @@ function loadEnv() {
 }
 loadEnv();
 
+// ─── WebRTC & Media Engine Switches ──────────────────────────────
+// Disable mDNS local IP masking so Electron advertises real LAN IPs for zero-latency local Wi-Fi P2P
+app.commandLine.appendSwitch("disable-features", "WebRtcHideLocalIpsWithMdns");
+// Prevent Electron/Chromium from blocking unmuted WebRTC stream autoplay
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+
 let mainWindow = null;
 const vcam = new VirtualCamera();
 
