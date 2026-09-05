@@ -17,12 +17,12 @@
 
 ## 📥 Desktop Software Downloads (Windows 10/11)
 
-> 🚀 **Direct Download from GitHub Releases:** [**Download PhoneCam Studio v2.0.0**](https://github.com/web-hasib/phone-cam/releases/tag/v2.0.0)
+> 🚀 **Direct Download from GitHub Releases:** [**Download PhoneCam Studio v2.0.1**](https://github.com/web-hasib/phone-cam/releases/tag/v2.0.1)
 
 | Package Type | Direct Download Link | Description |
 | :--- | :--- | :--- |
-| **🪟 Windows Installer (.exe)** | [**Download Setup (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.Setup.2.0.0.exe) | Standard Windows Setup with Start Menu & Desktop Shortcut |
-| **🪟 Windows Portable (.exe)** | [**Download Portable (v2.0.0)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.0/PhoneCam.Studio.2.0.0.exe) | Zero-install single executable (Run directly anywhere) |
+| **🪟 Windows Installer (.exe)** | [**Download Setup (v2.0.1)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.1/PhoneCam.Studio.Setup.2.0.1.exe) | Standard Windows Setup with Start Menu & Desktop Shortcut |
+| **🪟 Windows Portable (.exe)** | [**Download Portable (v2.0.1)**](https://github.com/web-hasib/phone-cam/releases/download/v2.0.1/PhoneCam.Studio.2.0.1.exe) | Zero-install single executable (Run directly anywhere) |
 
 ---
 

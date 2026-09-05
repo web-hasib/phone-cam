@@ -1,6 +1,6 @@
 {
   "name": "phonecam-desktop",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "PhoneCam Desktop Receiver Software",
   "homepage": "https://cam-backend-4bdx.onrender.com",
   "main": "main.js",
